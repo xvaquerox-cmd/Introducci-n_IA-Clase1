@@ -78,7 +78,7 @@ else:
     MIC_DEVICE_INDEX = MIC_DEVICE_INDEX_OVERRIDE
 
 # Palabras de activación y verbos permitidos: deben coincidir con la gramática en gramatica.py (AV y V).
-WAKE_WORDS: frozenset[str] = frozenset({"alexa", "siri", "google", "cortana"})
+WAKE_WORDS: frozenset[str] = frozenset({"alexa", "siri", "google", "cortana", "jarviz", "jarvis"})
 VERBOS: frozenset[str] = frozenset(
     {
         "canta",
@@ -93,29 +93,29 @@ VERBOS: frozenset[str] = frozenset(
     }
 )
 
-
-def _windows_root() -> Path:
-    return Path(os.environ.get("SystemRoot", r"C:\Windows"))
-
-
-def _candidates_edge() -> list[Path]:
+def _candidates_notas() -> list[Path]:
     return [
-        Path(r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"),
-        Path(r"C:\Program Files\Microsoft\Edge\Application\msedge.exe"),
+        Path(r"/System/Applications/Notes.app"),
     ]
 
+def _candidates_chrome() -> list[Path]:
+    return [
+        Path(r"/Applications/Google Chrome.app"),
+    ]
 
 def _candidates_word() -> list[Path]:
     return [
-        Path(r"C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE"),
-        Path(r"C:\Program Files (x86)\Microsoft Office\root\Office16\WINWORD.EXE"),
-        Path(r"C:\Program Files\Microsoft Office\Office16\WINWORD.EXE"),
+        Path(r"/Applications/Microsoft Word.app"),
     ]
 
+def _candidates_terminal() -> list[Path]:
+    return [
+        Path(r"/System/Applications/Utilities/Terminal.app"),
+    ]
 
 def _first_existing(paths: list[Path]) -> Path | None:
     for p in paths:
-        if p.is_file():
+        if p.exists(): # <--- Cambiamos .is_file() por .exists()
             return p
     return None
 
@@ -123,20 +123,22 @@ def _first_existing(paths: list[Path]) -> Path | None:
 def resolver_ruta_aplicacion(alias: str) -> Path | None:
     """Devuelve la ruta al .exe si existe (notepad, word, documento, edge). Si Edge/Word están en otra carpeta, agrega rutas en _candidates_*."""
     alias = alias.lower()
-    if alias == "notepad":
-        p = _windows_root() / "System32" / "notepad.exe"
-        return p if p.is_file() else None
+    if alias in ("notas", "documento"):
+        return _first_existing(_candidates_notas())
     if alias in ("word", "documento"):
         return _first_existing(_candidates_word())
-    if alias == "edge":
-        return _first_existing(_candidates_edge())
+    if alias == "chrome":
+        return _first_existing(_candidates_chrome())
+    if alias == "terminal":
+        return _first_existing(_candidates_terminal())
     return None
 
 
 # Nombres amigables para que el TTS diga "abriendo Word" en lugar del alias crudo.
 ALIAS_ETIQUETA: dict[str, str] = {
-    "notepad": "Bloc de notas",
+    "notas": "Bloc de notas",
     "word": "Word",
     "documento": "Word",
-    "edge": "Microsoft Edge",
+    "chrome": "Google Chrome",
+    "terminal": "Terminal",
 }

@@ -12,11 +12,11 @@ from asistente_voz.config import VERBOS, WAKE_WORDS
 
 GRAMATICA_TEXTO = r"""
 S -> AV VP
-AV -> 'alexa' | 'siri' | 'google' | 'cortana'
+AV -> 'alexa' | 'siri' | 'google' | 'cortana' | 'jarviz' | 'jarvis'
 VP -> V | V OBJ | V DET N | V N
 DET -> 'el' | 'la' | 'los' | 'las' | 'al'
 N -> 'perro' | 'gato' | 'luis' | 'miguel' | 'mana' | 'moderato' | 'jose'
-N -> 'notepad' | 'word' | 'edge' | 'documento'
+N -> 'notas' | 'word' | 'chrome' | 'terminal' 
 V -> 'canta' | 'escribe' | 'reproduce' | 'reproducir' | 'busca' | 'buscar' | 'abre' | 'abrir' | 'inicia'
 OBJ -> '__objeto__'
 """

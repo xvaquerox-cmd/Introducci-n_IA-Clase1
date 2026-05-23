@@ -78,7 +78,7 @@ def ejecutar_abrir_aplicacion(alias: str, hablar) -> None:
     hablar(msg)
     time.sleep(0.5)
     try:
-        subprocess.Popen([str(ruta)], shell=False)
+        subprocess.Popen(["open",str(ruta)], shell=False)
     except OSError as e:
         hablar("No pude lanzar la aplicación.")
         print(e)
@@ -86,7 +86,7 @@ def ejecutar_abrir_aplicacion(alias: str, hablar) -> None:
 
 def detectar_alias_app_en_tokens(tokens: list[str]) -> str | None:
     # Primera coincidencia con la lista; debe alinearse con lo que entiende resolver_ruta_aplicacion.
-    apps = ("notepad", "word", "edge", "documento")
+    apps = ("notas", "word", "chrome", "documento", "terminal")
     found: str | None = None
     for t in tokens:
         if t in apps:
