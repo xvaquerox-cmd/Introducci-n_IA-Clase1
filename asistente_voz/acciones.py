@@ -10,7 +10,9 @@ import subprocess
 import threading
 import time
 import webbrowser
-from urllib.parse import quote_plus
+import json
+import urllib.request
+from urllib.parse import quote_plus, quote
 
 import pywhatkit
 
@@ -92,3 +94,95 @@ def detectar_alias_app_en_tokens(tokens: list[str]) -> str | None:
         if t in apps:
             found = t
     return found
+    
+def ejecutar_consulta_tipo_cambio(consulta: str, hablar) -> None:
+    # Le avisamos al usuario que estamos buscando la información
+    hablar("Consultando el tipo de cambio en el Banco de México.")
+    
+    url = "https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718,SF343410/datos/oportuno"
+    token = "6f56d2412aa2a3f530dc89983d7155349245ad9491464b9411766d6c65e5ee3c" #token de ERP SOLTEC 
+    
+    # Preparamos la petición HTTP con los encabezados (headers) requeridos por Banxico
+    req = urllib.request.Request(
+        url,
+        headers={
+            "Bmx-Token": token,
+            "Accept": "application/json"
+        }
+    )
+    
+    try:
+        # Hacemos la consulta física a la API (máximo 5 segundos de espera)
+        with urllib.request.urlopen(req, timeout=5) as response:
+            datos = json.loads(response.read().decode("utf-8"))
+            series = datos["bmx"]["series"]
+            
+            # Buscamos las series FIX (SF43718) y de Cierre (SF343410) en la respuesta
+            fix_serie = next((s for s in series if s["idSerie"] == "SF43718"), None)
+            cierre_serie = next((s for s in series if s["idSerie"] == "SF343410"), None)
+            
+            fix_dato = fix_serie["datos"][0]["dato"] if fix_serie and "datos" in fix_serie and fix_serie["datos"] else None
+            cierre_dato = cierre_serie["datos"][0]["dato"] if cierre_serie and "datos" in cierre_serie and cierre_serie["datos"] else None
+            
+            # Construimos la frase que dirá el asistente de voz
+            if fix_dato:
+                msg = f"El tipo de cambio FIX reportado hoy es de {fix_dato} pesos por dólar."
+                if cierre_dato:
+                    msg += f" Y el tipo de cambio de cierre es de {cierre_dato} pesos por dólar."
+            else:
+                msg = "No encontré datos de tipo de cambio disponibles en este momento."
+            
+            # Imprimimos en consola y mandamos la respuesta a la síntesis de voz (TTS)
+            print(f"[Banxico] {msg}")
+            hablar(msg)
+            
+    except Exception as e:
+        print(f"[Banxico Error] {e}")
+        hablar("Lo siento, tuve un problema de conexión al consultar el Banco de México.")
+
+def ejecutar_consulta_ip_publica(hablar) -> None:
+    hablar("Consultando tu dirección IP pública en internet.")
+    
+    try:
+        # consultamos pagina para leer ip
+        with urllib.request.urlopen("https://api.ipify.org", timeout=5) as response:
+            ip = response.read().decode("utf-8").strip()
+            
+            # reemplazamos "." por palabra "punto"
+            ip_leible = ip.replace(".", " punto ")
+            msg = f"Tu dirección IP pública es {ip_leible}."
+            
+            print(f"[IP Pública] {ip}")
+            hablar(msg)
+            
+    except Exception as e:
+        print(f"[IP Error] {e}")
+        hablar("Lo siento, no pude obtener tu dirección IP pública.")
+        
+def ejecutar_consulta_clima_local(hablar) -> None:
+    
+    hablar("Buscando tu ubicación en el mapa.")
+    
+    try:
+        
+        url_geolocalizacion = "http://ip-api.com/json/" # 1 localizamos 
+        respuesta_geo = urllib.request.urlopen(url_geolocalizacion, timeout=5)
+        datos_geo_texto = respuesta_geo.read().decode("utf-8")
+        
+        
+        datos_geo_diccionario = json.loads(datos_geo_texto) # 2 respuesta en JSON 
+        ciudad = datos_geo_diccionario.get("city", "Mexicali") # 3 del JSON sacamos la ciudad y si no hay decimos que es Mexicali... 
+        ciudad_para_url = quote(ciudad) # 4 guardamos ciudad en variable para url 
+        url_clima = f"http://wttr.in/{ciudad_para_url}?lang=es&format=%C+con+temperatura+de+%t" # 5 generamos url de consulta 
+        respuesta_clima = urllib.request.urlopen(url_clima, timeout=5)
+        clima_texto = respuesta_clima.read().decode("utf-8").strip() # 6 la respuesta la guardamos en variable 
+              
+        mensaje_final = f"Según tu dirección de internet, estás en la ciudad de {ciudad}. El clima actual es {clima_texto}." # 7  generamos el mensaje de aviso
+        
+        
+        print(f"[Clima Local] {mensaje_final}") # 8 mostramos mensaje de la respuesta
+        hablar(mensaje_final) #decimo mensaje
+        
+    except Exception as e:
+        print(f"[Error Clima] {e}")
+        hablar("Lo siento, no pude determinar tu ubicación o el clima de tu ciudad.")

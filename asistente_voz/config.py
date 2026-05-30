@@ -90,6 +90,9 @@ VERBOS: frozenset[str] = frozenset(
         "abre",
         "abrir",
         "inicia",
+        "dime",
+        "dame",
+        "donde",
     }
 )
 

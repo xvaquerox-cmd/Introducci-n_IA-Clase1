@@ -14,6 +14,9 @@ from asistente_voz.acciones import (
     ejecutar_abrir_aplicacion,
     ejecutar_busqueda_google,
     ejecutar_reproducir_youtube,
+    ejecutar_consulta_tipo_cambio,
+    ejecutar_consulta_ip_publica,
+    ejecutar_consulta_clima_local,
 )
 from asistente_voz.config import POST_WELCOME_SILENCE_S, VERBOS, WAKE_WORDS, env_si
 from asistente_voz.gramatica import comando_valido_según_gramatica
@@ -84,6 +87,18 @@ def procesar_comando(comando_normalizado: str, generador_voz: GeneradorVoz) -> N
             hablar("Di qué aplicación abrir: bloc de notas, Word o Edge.")
         else:
             ejecutar_abrir_aplicacion(alias, hablar)
+    elif verbo == "donde":
+        ejecutar_consulta_clima_local(hablar)
+    elif verbo in ("dime", "dame"):
+        consulta = " ".join(cola)
+        if any(x in consulta for x in ("tipo de cambio", "dolar", "dólar", "cambio")):
+            ejecutar_consulta_tipo_cambio(consulta, hablar)
+        elif "ip" in consulta:  # agregamos IP
+            ejecutar_consulta_ip_publica(hablar)  # llamamos funcion IP
+        elif any(x in consulta for x in ("clima", "tiempo", "temperatura")):  # consulta clima
+            ejecutar_consulta_clima_local(hablar)  # llamamos función del clima   
+        else:
+            hablar("No sé cómo responder a esa consulta. Solo sé decirte el tipo de cambio.")
     else:
         hablar("No tengo una acción definida para ese verbo todavía.")
 

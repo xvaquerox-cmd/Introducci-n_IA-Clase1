@@ -79,6 +79,13 @@ class GeneradorVoz:
         if not texto:
             return
         print(f"[TTS] {texto[:100]}{'…' if len(texto) > 100 else ''}", flush=True)
+        if sys.platform == "darwin":  #aqui es donde comparo si es una MAC darwin regresa el valor si es una macOs 
+            import subprocess
+            try:
+                subprocess.run(["say", texto], check=True)
+                return
+            except Exception as e:
+                print(f"[TTS] Falló say nativo de macOS: {e}")
         if self._preferir_com and _hablar_sapi_com(texto):
             return
         if self._pyttsx3 is None:
