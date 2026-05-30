@@ -1,0 +1,171 @@
+Tuve que ver un par de videos de youtube para ver como se clonaba 
+el github 
+
+para entenderlo 
+y luego para buscar el usuario 
+ya que lo encontre investigue como clonar 
+un repositorio 
+
+después creamos el entorno virtual con el comando 
+
+python3 -m venv .venv
+
+luego lo activamos 
+
+source .venv/bin/activate
+
+ya que se activo 
+
+se intalaron los requerimientos que vienen en el archivo que nos compartio 
+el profesor 
+
+una vez que intentamos de instalar los requerimientos me marco el sistema que el sistema operativo 
+para el que esta desarrollado la aplicación es para windows y que el módulo de sonido
+requeria instalarse  para lo cual consulte como instalar ese módulo para MAC y 
+se instalo completo 
+
+se volvió a ejecutar lo requerimientos y se instalaron sin problema 
+
+una vez intentando ejectar el proyecto me tope que MAC OSX ejecuta de manera diferentes las aplicaciones 
+tuve que hacer cambios en el código "config.py" en una linea cambiandola por if p.exists():
+asi como en acciones.py una linea que le agregamos open 
+"subprocess.Popen(["open",str(ruta)], shell=False)"
+
+y ademas editamos la rutas de las ubicaciones de los archivos ejecutables en la carpeta
+de aplicaciones de OSX
+
+en total se editaron 4 archivos
+ 
+Archivo que cambie..
+        modified:   asistente_voz/acciones.py
+        modified:   asistente_voz/agente.py
+        modified:   asistente_voz/config.py
+        modified:   asistente_voz/gramatica.py
+        
+        
+ después quise generar un esquema para no alterar el que tenia el profesor 
+y use el comando       
+        
+  git checkout -b mi-version-asistente 
+  
+  para crear una copia local para mi y no tocar el proyecto del profesor 
+  
+ya con eso trabajamos en nuestro proyecto luego entre a mi cuenta de github   
+y cambie el código a mi github con esta instrucción 
+
+git remote set-url origin https://github.com/xvaquerox-cmd/Introducci-n_IA-Clase1.git
+
+y despues hice un push 
+
+git push -u origin mi-version-asistente
+
+y hasta ahi .. 
+
+Tarea, hay que agregar 3 comando nuevos al asistente
+
+Comando 1
+
+Consultar el tipo de cambio de Banxico 
+Tengo un API en un ERP que estoy trabajando donde consulto 
+El tipo de cambio de Banxico el cual lo tengo en un carpeta 
+Que se llama tipo de cambio 
+
+El cual utilizo el API que tengo lo adapte al proyecto
+
+En el config agregue el comando dime en los VERBOS
+
+En gramatica tambiénn agregue en V-> agregue "dime"
+VERBOS_CON_OBJETO_ABIERTO también agregé "dime"
+
+En acciones.py se agrego 
+import json
+import urllib.request
+
+Me encontre con un problema cuando le solicite el tipo de cambio 
+La libreria "pyttsx3" si al atacas para que diga varias cosas en Mac
+Da problemas y se queda muda y se adapto para utilizar el comando say 
+En mi terminal por ejemplo 
+
+cesartorresfelix@Cesars-Mac-mini tipo-cambio % say "Hola muy buenos dias papacito"
+
+Y habla de una manera más natural
+
+Para esto usamos dos archivos 
+
+voz_stt.py que es el oído usa el microfono 
+voz_tts.py que es la voz ahi agregue la función "Darwin" donde phyton detecta si es una MAC y si lo es usa "say"
+
+El comando estaba trabajando cone el verbo "dime" y le agregue también el comando "dame" 
+Para que también responda a "jarviz dame el tipo de cambio"
+Agregue el verbo en config y en config.py, gramatica.py, y en agente.py
+
+Doy por completado el 1er comando adicional "JARVIZ DAME/DIME TIPO DE CAMBIO"
+
+Ok ahora se me ocurrió agregar un comando nuevo "JARVIZ DAME MI IP PUBLICA"
+Investigando como puedo sacarla hay una página https://api.ipify.org/
+Que te devuelve de manera plana la IP publica de donde estas
+Y pues aproveche que es muy simple para no batallar mucho la verdad 
+Y pues directamente de la página la obtenemos la consulto y 
+Ya que la tengo reemplazo en la variable los puntos por la palabra punto 
+Para que el asistente de voz me diga en texto la palabra punto 
+Y se agrego la función en acciones.py 
+en agente.py agregamos la acción
+
+Y ya tenemos "JARVIZ DIME MI IP PUBLICA"
+
+
+
+Ok para el tercer comando se voz se me ocurrió preguntar en que ciudad estoy y que 
+Me reponda en que ciudad estoy y que clima hay como complemento para eso 
+Utilice estos servicios gratuitos los cuales agregue en el archivo acciones.py 
+
+API de Localización (http://ip-api.com/json/)
+API del Clima (http://wttr.in/)
+
+Como ya tengo la IP Pública la obtengo y con ella utilizo el API 
+De localización donde estoy y me da la ciudad y luego ese parámetro 
+lo mando para que me regrese el clima de la ciudad 
+
+Utilizando los verbos de "dame" o "dime" p¡con los que arme la oración 
+Pero resulta que me daba el clima en ingles por default 
+Pero investigando un poco hay un parámetro que manda uno en el url 
+lang=es y pues ya te lo da en español lo mismo lo grados 
+format=%C
+
+Me tope con otro problema que me daba un error usando "https" y nos e si fue suerte o que 
+Pero le quite la "s" deje solo "http" y funciono 
+
+En el archivo agente.py
+Agregue la función "ejecutar_consulta_clima_local(hablar)"
+
+Ya con esto me responde 
+
+JARVIZ DAME EL CLIMA 
+JARVIZ DONDE ESTOY
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        

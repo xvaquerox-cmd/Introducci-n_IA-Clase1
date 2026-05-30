@@ -1,0 +1,13 @@
+body {
+  margin: 0;
+  padding: 8px;
+  font-family: monospace;
+  font-size: 13px;
+  background: white;
+  color: black;
+}
+
+/* Quitar el margen entre los dos pre para que queden pegados */
+pre {
+  margin: 0;
+}
