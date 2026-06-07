@@ -428,4 +428,4 @@ acciones.py ejecuta
 voz_tts.py responde
 ```
 
-Con eso quedo terminada mi version del asistente de voz y respaldada en GitHub.
+
