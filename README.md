@@ -1,254 +1,433 @@
-# Asistente de voz por comandos
+# Asistente de Voz - Proyecto de Introduccion a la IA
 
-Aplicación en Python que escucha instrucciones en lenguaje natural (o las lee por teclado), las valida con una gramática formal y ejecuta acciones concretas: buscar o reproducir contenido en la web, abrir programas en Windows y responder por voz sintética.
+Este repositorio es mi version trabajada del proyecto **Asistente_Voz** que el profesor compartio desde:
 
-Está pensada como **base modular**: puedes ampliar verbos, reglas gramaticales y acciones editando unos pocos archivos, sin reescribir todo el flujo.
+[https://github.com/Heeber24/Asistente_Voz](https://github.com/Heeber24/Asistente_Voz)
 
----
+Yo lo importe a mi cuenta de GitHub para poder trabajarlo sin modificar directo el repositorio original:
 
-## ¿Qué es y para qué sirve?
+[https://github.com/xvaquerox-cmd/Introducci-n_IA-Clase1/tree/mi-version-asistente](https://github.com/xvaquerox-cmd/Introducci-n_IA-Clase1/tree/mi-version-asistente)
 
-Es un **asistente por comandos** con palabra de activación (por ejemplo “Alexa …”, “Google …”). Tras la activación, reconoce un **verbo** (`reproduce`, `busca`, `abre`, etc.) y el **resto de la frase** se usa como argumento (búsqueda en YouTube/Google o nombre de aplicación).
-
-Sirve para:
-
-- Automatizar tareas habituales con la voz (o con texto en modo depuración).
-- Experimentar con **reconocimiento de voz**, **síntesis de voz** y **procesamiento del lenguaje natural ligero** (gramática) en un solo proyecto pequeño.
-- Partir de un código ordenado si quieres integrar más servicios o reglas propias.
+La idea de la tarea era entender como funcionaba el asistente de voz y agregar **3 comandos nuevos**. En mi caso tambien tuve que adaptarlo para que funcionara en una **Mac mini**, porque el proyecto original estaba mas orientado a Windows.
 
 ---
 
-## Cómo funciona (visión general)
+## Resumen de lo que se hizo
 
-El flujo sigue el esquema clásico **percibir → interpretar → actuar**:
+Primero tuve que entender GitHub, clonar/importar el proyecto, crear mi rama de trabajo y despues correr el asistente en mi computadora. Al intentar ejecutarlo tal como venia, me di cuenta de que algunas partes no funcionaban igual en macOS, sobre todo la voz y la apertura de aplicaciones.
 
-1. **Percibir**: se captura audio del micrófono (o se escribe un comando en consola) y se obtiene texto mediante reconocimiento automático del habla.
-2. **Interpretar**: el texto se normaliza (minúsculas, sin acentos), se divide en palabras (*tokens*) y se comprueba si la secuencia encaja en una **gramática** definida en el código. Así se evita ejecutar frases mal formadas.
-3. **Actuar**: si la frase es válida, según el verbo se llama a funciones que abren el navegador, lanzan un `.exe` o generan mensajes de voz.
+Despues de varios dias revisando el proyecto, fui entendiendo que el asistente trabaja asi:
 
-La voz de respuesta confirma lo que va a hacer el sistema y guía al usuario si falta información (por ejemplo, no se dijo qué buscar).
-
----
-
-## Tecnologías y piezas del proyecto
-
-### Reconocimiento de voz (entrada de audio)
-
-- **Librerías**: [SpeechRecognition](https://pypi.org/project/SpeechRecognition/) captura audio con **PyAudio** y, en esta configuración, envía el audio al **reconocimiento en la nube de Google** (`recognize_google`), que devuelve texto. Requiere **conexión a Internet**.
-- **Idioma**: por defecto `es-MX`; se puede cambiar con variable de entorno o en `asistente_voz/config.py` (`LANGUAGE_STT`). Códigos típicos: `es-ES`, `es-MX`, `en-US`, etc. (los que soporte el proveedor).
-- **Micrófono**: el índice del dispositivo se configura en `config.py` (comentarios en ese archivo explican cómo listar micrófonos con un comando de Python). También puedes fijar `ASISTENTE_MIC_INDEX` sin tocar el código.
-
-### Gramática (validación de la frase)
-
-- **Librería**: [NLTK](https://www.nltk.org/) con una **gramática libre de contexto (CFG)** escrita como texto en `asistente_voz/gramatica.py`.
-- **Idea**: las órdenes válidas tienen una estructura fija, por ejemplo *palabra de activación* + *verbo* + *complemento*. La CFG describe patrones como “Alexa reproduce …” o “Google abre el notepad”.
-- **Consultas abiertas** (canción, término de búsqueda): no se listan todas las frases posibles en la gramática; para verbos como `reproduce` o `busca`, la cola de palabras se sustituye internamente por un comodín (`__objeto__`) y el analizador solo comprueba que haya “algo” después del verbo. Para `abre`, los nombres de aplicación sí van como reglas concretas en la gramática (alineadas con `acciones.py` y `config.py`).
-
-### Síntesis de voz (respuesta hablada)
-
-- **En Windows**: por defecto se intenta usar **SAPI** a través de `win32com` (habitualmente instalado con el paquete **pywin32**). Si no está disponible, se usa **pyttsx3** con el motor `sapi5`.
-- **En otros sistemas**: pyttsx3 con el motor que tenga disponible el SO.
-- **Parámetros**: velocidad y volumen se ajustan en `config.py` o con variables de entorno (`ASISTENTE_TTS_RATE`, `ASISTENTE_TTS_VOLUME`). Ver comentarios en `asistente_voz/voz_tts.py` para forzar solo pyttsx3 o preferir voz en español.
-
-### Acciones (efectos en el equipo y la web)
-
-- **Librerías**: [pywhatkit](https://pypi.org/project/pywhatkit/) para abrir búsquedas o reproducción en el navegador; **webbrowser** y **subprocess** como respaldo o para lanzar ejecutables (Bloc de notas, Word, Edge, etc.).
-- Las rutas de aplicaciones en Windows están centralizadas en `config.py` para que puedas adaptarlas a tu instalación.
-
-### Normalización de texto
-
-- En `asistente_voz/texto.py` se unifica el formato del texto reconocido para que coincida con las palabras de la gramática y se corrige el orden si el motor de reconocimiento devuelve primero el verbo y después la palabra de activación.
-
----
-
-## Requisitos
-
-- **Sistema operativo**: probado y orientado a **Windows** (rutas de Edge/Office y TTS por SAPI). Con cambios menores en rutas y dependencias puede adaptarse a Linux o macOS.
-- **Python**: 3.10 o superior recomendado.
-- **Hardware**: micrófono si usas modo voz.
-- **Red**: obligatoria para el reconocimiento con Google en la configuración actual.
-
----
-
-## Entorno virtual (recomendado)
-
-Aislar las dependencias en un entorno virtual (`.venv`) evita conflictos con otros proyectos y deja claro qué paquetes usa este código.
-
-### Crear el entorno (Windows, PowerShell)
-
-Desde la carpeta raíz del repositorio (donde está `requirements.txt`):
-
-```powershell
-python -m venv .venv
+```text
+yo hablo
+el microfono escucha
+Google convierte la voz a texto
+la gramatica valida la frase
+agente.py decide que hacer
+acciones.py ejecuta la accion
+voz_tts.py responde hablando
 ```
 
-### Activar el entorno
+Al final quedaron agregados estos comandos:
 
-**PowerShell** (si aparece error de política de ejecución, puede hacer falta `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` una vez):
+1. Consultar el tipo de cambio de Banxico.
+2. Consultar mi IP publica.
+3. Decir en que ciudad estoy y complementar con el clima.
 
-```powershell
-.\.venv\Scripts\Activate.ps1
+Tambien se adaptaron algunas partes para macOS, como abrir aplicaciones con `open` y usar el comando nativo `say` para la voz.
+
+---
+
+## Como funciona el proyecto
+
+El asistente sigue una idea simple:
+
+**percibir -> interpretar -> actuar**
+
+1. **Percibir:** escucha la voz con el microfono.
+2. **Interpretar:** convierte la voz a texto y valida que la frase tenga sentido con la gramatica.
+3. **Actuar:** ejecuta una funcion dependiendo del comando.
+
+Por ejemplo, si digo:
+
+```text
+jarvis dame el tipo de cambio
 ```
 
-**Símbolo del sistema (cmd)**:
+El programa detecta:
 
-```bat
-.\.venv\Scripts\activate.bat
+```text
+palabra de activacion: jarvis
+verbo: dame
+consulta: el tipo de cambio
 ```
 
-Tras activar, el prompt suele mostrar `(.venv)` al inicio.
+Y entonces llama la funcion que consulta Banxico.
 
-### Instalar dependencias dentro del entorno
+---
 
-Con el entorno **activado**:
+## Archivos principales
 
-```powershell
-python -m pip install --upgrade pip
+| Archivo | Para que sirve |
+|---|---|
+| `Asistente_Voz_IA.py` | Es el archivo principal. Arranca el asistente. |
+| `asistente_voz/agente.py` | Es como el cerebro del asistente. Recibe el texto, identifica el verbo y decide que funcion ejecutar. |
+| `asistente_voz/config.py` | Tiene configuracion general: palabras de activacion, verbos, microfono y rutas de aplicaciones. |
+| `asistente_voz/gramatica.py` | Valida que la frase tenga una estructura correcta usando una gramatica. |
+| `asistente_voz/acciones.py` | Aqui estan las funciones que hacen el trabajo real: abrir apps, consultar APIs, buscar en web, etc. |
+| `asistente_voz/voz_stt.py` | Es el oido del asistente. Captura audio y lo manda a Google para convertirlo a texto. |
+| `asistente_voz/voz_tts.py` | Es la boca del asistente. Convierte texto a voz para que la computadora conteste hablando. |
+| `asistente_voz/texto.py` | Normaliza el texto: minusculas, acentos, tokens y orden de palabras. |
+| `Base_Hechos.py` | Sistema experto aparte, para identificar animales por caracteristicas. |
+| `tipo-cambio/` | Mini proyecto en Node.js que use como referencia para la consulta a Banxico. |
+| `Notas_Cesar_Torres.txt/` | Bitacora personal del proceso. |
+
+---
+
+## Adaptacion a macOS
+
+El proyecto original venia mas pensado para Windows. Al correrlo en mi Mac mini tuve que revisar varios errores.
+
+### Voz del asistente
+
+El proyecto usaba `pyttsx3` para hablar. En Windows funciona bien porque se conecta al motor de voz de Windows, pero en mi Mac se quedaba mudo o no terminaba algunas frases.
+
+Antes se usaba algo como:
+
+```python
+self._pyttsx3.say(texto)
+self._pyttsx3.runAndWait()
+```
+
+En macOS lo cambie para usar el comando nativo de la Mac:
+
+```python
+subprocess.run(["say", texto], check=True)
+```
+
+Esto se hizo en `asistente_voz/voz_tts.py`, detectando si el sistema es Mac:
+
+```python
+if sys.platform == "darwin":
+```
+
+`darwin` es como Python identifica a macOS.
+
+### Apertura de aplicaciones
+
+Tambien adapte la parte de abrir aplicaciones. En Windows se hablaba de `notepad`, pero en Mac no existe. Entonces lo adapte para abrir Notas, Chrome y Terminal.
+
+En Mac se usa `open`, por eso en `acciones.py` se usa:
+
+```python
+subprocess.Popen(["open", str(ruta)], shell=False)
+```
+
+---
+
+## Microfono
+
+El microfono se configura en:
+
+```text
+asistente_voz/config.py
+```
+
+La variable importante es:
+
+```python
+MIC_DEVICE_INDEX_OVERRIDE
+```
+
+En mi caso use el indice `3`, porque era el microfono USB de mi webcam.
+
+Para listar microfonos se puede usar:
+
+```bash
+python -c "import speech_recognition as sr; [print(i, '-', n) for i, n in enumerate(sr.Microphone.list_microphone_names())]"
+```
+
+---
+
+## Palabras de activacion y verbos
+
+Agregue `jarvis` y `jarviz` como palabras de activacion, porque a veces Google transcribe diferente lo que uno dice.
+
+Tambien agregue los verbos:
+
+```text
+dime
+dame
+donde
+```
+
+Estos verbos se agregan en:
+
+```text
+asistente_voz/config.py
+asistente_voz/gramatica.py
+```
+
+Y despues se conectan en:
+
+```text
+asistente_voz/agente.py
+```
+
+---
+
+## Comandos agregados
+
+### 1. Tipo de cambio de Banxico
+
+Comandos:
+
+```text
+jarvis dime el tipo de cambio
+jarvis dame el tipo de cambio
+```
+
+Para este comando use una API de Banxico, porque ya habia trabajado algo parecido en un ERP que estoy haciendo.
+
+API usada:
+
+```text
+https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718,SF343410/datos/oportuno
+```
+
+Esta consulta trae:
+
+- Tipo de cambio FIX.
+- Tipo de cambio de cierre.
+
+La funcion se agrego en:
+
+```text
+asistente_voz/acciones.py
+```
+
+Y se conecta desde:
+
+```text
+asistente_voz/agente.py
+```
+
+El agente revisa si la consulta contiene palabras como:
+
+```text
+tipo de cambio
+dolar
+cambio
+```
+
+Si encuentra esas palabras, llama la funcion que consulta Banxico.
+
+---
+
+### 2. IP publica
+
+Comandos:
+
+```text
+jarvis dame mi ip publica
+jarvis dime mi ip publica
+```
+
+API usada:
+
+```text
+https://api.ipify.org
+```
+
+Esta API devuelve directamente la IP publica de la conexion.
+
+En `acciones.py` se lee la respuesta y luego se cambia el punto por la palabra `punto`, para que el asistente la pueda decir mas claro.
+
+Ejemplo:
+
+```text
+189.203.44.12
+```
+
+Se lee como:
+
+```text
+189 punto 203 punto 44 punto 12
+```
+
+---
+
+### 3. Ciudad y clima
+
+Comandos:
+
+```text
+jarvis donde estoy
+jarvis dime el clima
+jarvis dame el clima
+jarvis dame la temperatura
+```
+
+Aqui se usan dos servicios:
+
+#### API para detectar ciudad
+
+```text
+http://ip-api.com/json/
+```
+
+Esta API detecta la ubicacion aproximada usando la IP publica. Devuelve datos como pais, region y ciudad.
+
+#### API para consultar clima
+
+```text
+http://wttr.in/
+```
+
+Primero se consulta la ciudad. Luego esa ciudad se usa para armar la URL del clima.
+
+Ejemplo:
+
+```text
+http://wttr.in/Mexicali?lang=es&format=%C+con+temperatura+de+%t
+```
+
+Donde:
+
+- `lang=es` hace que responda en español.
+- `%C` trae la condicion del clima, por ejemplo `Soleado`.
+- `%t` trae la temperatura.
+
+Me paso que usando `https` me daba un error en mi Mac, entonces para esta consulta publica lo deje con `http` y funciono bien.
+
+Tambien deje `Mexicali` como valor de respaldo por si no se detecta la ciudad durante la demostracion.
+
+---
+
+## Ejemplos de uso
+
+Con el entorno virtual activado:
+
+```bash
+python Asistente_Voz_IA.py
+```
+
+Ejemplos de comandos por voz:
+
+```text
+jarvis dame el tipo de cambio
+jarvis dime mi ip publica
+jarvis donde estoy
+jarvis dame el clima
+jarvis abre notas
+jarvis abre terminal
+jarvis busca inteligencia artificial
+jarvis reproduce Soda Stereo
+```
+
+---
+
+## Instalacion basica
+
+Crear entorno virtual:
+
+```bash
+python3 -m venv .venv
+```
+
+Activarlo en Mac:
+
+```bash
+source .venv/bin/activate
+```
+
+Instalar dependencias:
+
+```bash
 pip install -r requirements.txt
 ```
 
-Eso instala lo declarado en `requirements.txt` (entre otros: `nltk`, `SpeechRecognition`, `pyaudio`, `pyttsx3`, `pywhatkit`).
+Ejecutar:
 
-**Si falla la instalación de PyAudio en Windows**, es un caso frecuente; suele resolverse con ruedas precompiladas o herramientas como `pipwin` (indicaciones en comentarios al inicio de `requirements.txt`).
-
-### Opcional: voz SAPI con `win32com` en Windows
-
-Para que el programa use primero **SAPI por COM** (comportamiento por defecto en Windows en `voz_tts.py`), instala también:
-
-```powershell
-pip install pywin32
-```
-
-Si no está instalado, el código sigue funcionando usando **pyttsx3**.
-
----
-
-## Cómo ejecutar el proyecto
-
-La carpeta raíz debe ser la del repositorio (donde está `Asistente_Voz_IA.py`), con el entorno virtual activado y dependencias instaladas.
-
-### Arranque principal
-
-```powershell
+```bash
 python Asistente_Voz_IA.py
 ```
 
-### Arranque alternativo (desde la misma raíz)
+---
 
-```powershell
-python scripts/ejecutar_asistente.py
+## Modo texto para probar sin microfono
+
+Tambien se puede probar por texto, que sirve mucho para depurar sin estar hablando todo el tiempo.
+
+En Mac:
+
+```bash
+ASISTENTE_TEXTO=1 python Asistente_Voz_IA.py
 ```
-
-Ese script añade la raíz al `PYTHONPATH` y llama al mismo punto de entrada; es útil si prefieres tener el comando bajo `scripts/`.
-
-### Modo solo texto (sin micrófono)
-
-Útil en entornos ruidosos, sin permisos de micrófono o para depurar la gramática y las acciones:
-
-**PowerShell**
-
-```powershell
-$env:ASISTENTE_TEXTO = "1"
-python Asistente_Voz_IA.py
-```
-
-**cmd**
-
-```bat
-set ASISTENTE_TEXTO=1
-python Asistente_Voz_IA.py
-```
-
-En modo texto escribes el comando cuando aparezca `Comando >`. La misma gramática y las mismas acciones se aplican que en modo voz.
 
 ---
 
-## Ejemplos de comandos
+## Flujo para agregar un comando nuevo
 
-La frase debe incluir una **palabra de activación** al inicio (tras la normalización): `alexa`, `siri`, `google` o `cortana`. Luego un **verbo** reconocido y el resto según la acción.
+Lo que entendi es que normalmente se cambian estos archivos:
 
-- `alexa reproduce luis miguel`
-- `siri busca tutorial python`
-- `google abre el notepad`
-- `cortana abre edge`
+1. `config.py`  
+   Se agrega el verbo a `VERBOS`.
 
-Los verbos y las palabras de activación deben estar alineados entre `asistente_voz/gramatica.py` y `asistente_voz/config.py`.
+2. `gramatica.py`  
+   Se agrega el verbo a la gramatica y, si acepta texto libre despues, tambien a `VERBOS_CON_OBJETO_ABIERTO`.
 
----
+3. `acciones.py`  
+   Se programa la funcion que hace el trabajo.
 
-## Configuración
+4. `agente.py`  
+   Se conecta el comando con la funcion.
 
-### Archivo `asistente_voz/config.py`
-
-Ahí se concentran:
-
-- **Lista de palabras de activación y verbos** (`WAKE_WORDS`, `VERBOS`): deben coincidir con la CFG en `gramatica.py`.
-- **Idioma del reconocimiento**, tiempos de escucha, calibración de ruido, límites de duración de frase.
-- **Volumen y velocidad del TTS**.
-- **Índice del micrófono** y comentarios con el comando para listar dispositivos.
-- **Rutas** a ejecutables (Edge, Word, Bloc de notas) y etiquetas amigables para la voz.
-
-En el propio archivo hay comentarios en español que explican bloque por bloque qué tocar y para qué sirve cada valor.
-
-### Variables de entorno (opcional)
-
-Muchas claves tienen un valor por defecto en código; las variables permiten probar sin editar archivos. Algunas de las más útiles:
-
-| Variable | Efecto |
-|----------|--------|
-| `ASISTENTE_TEXTO` | `1` activa modo consola en lugar del micrófono. |
-| `ASISTENTE_MIC_INDEX` | Número de dispositivo de entrada; anula el índice por defecto de `config.py`. |
-| `ASISTENTE_LISTAR_MICS` | `1` lista todos los micrófonos al iniciar (para elegir índice). |
-| `ASISTENTE_LANG_STT` | Idioma del reconocimiento (p. ej. `es-MX`, `es-ES`). |
-| `ASISTENTE_ESCUCHA_TIMEOUT` | Segundos de espera a que empieces a hablar. |
-| `ASISTENTE_FRASE_MAX_S` | Duración máxima capturada por comando (0 = sin tope). |
-| `ASISTENTE_TTS_RATE` / `ASISTENTE_TTS_VOLUME` | Ritmo y volumen del habla. |
-| `ASISTENTE_TTS_PYTTSX3` | `1` fuerza motor pyttsx3 en Windows en lugar de SAPI/COM. |
-| `ASISTENTE_TTS_VOZ_ES` | `1` intenta seleccionar una voz en español si existe. |
-| `ASISTENTE_DEBUG_STT` | `1` imprime información extra del reconocimiento. |
-| `ASISTENTE_REPETIR_STT_VOZ` | `1` hace que el asistente repita por voz lo que entendió (útil para depurar). |
-
-La lista completa de ajustes finos está documentada con comentarios en `config.py`, `voz_stt.py` y `voz_tts.py`.
+Este fue el aprendizaje mas importante para mi, porque ahi entendi como una frase hablada termina convirtiendose en una accion real.
 
 ---
 
-## Estructura del repositorio
+## GitHub
 
-```
-Asistente_Voz/
-├── asistente_voz/           # Código del asistente (paquete Python)
-│   ├── agente.py            # Bucle principal: escucha/lee, valida, despacha acciones
-│   ├── config.py            # Parámetros y rutas (mic, STT, TTS, verbos, aplicaciones)
-│   ├── gramatica.py         # CFG NLTK y comprobación de validez de la frase
-│   ├── texto.py             # Normalización de texto y orden de tokens
-│   ├── voz_stt.py           # Micrófono + reconocimiento (SpeechRecognition / Google)
-│   ├── voz_tts.py           # Síntesis de voz (SAPI / pyttsx3)
-│   └── acciones.py          # YouTube, Google, apertura de programas
-├── requirements.txt
-├── README.md
-├── Asistente_Voz_IA.py      # Punto de entrada recomendado
-└── Base_Hechos.py               # Sistema experto por rasgos (animales); independiente del asistente de voz
+Para respaldar cambios use este flujo:
+
+```bash
+git status
+git add .
+git commit -m "mensaje del cambio"
+git push origin mi-version-asistente
 ```
 
-Para **ampliar** el asistente suele bastar con:
-
-1. Añadir reglas y vocabulario en `gramatica.py` y los mismos tokens en `VERBOS` / `WAKE_WORDS` en `config.py`.
-2. Implementar la lógica nueva en `acciones.py` (o en otro módulo tuyo) y enlazar el verbo en `agente.py` dentro de `procesar_comando`.
+Tambien aprendi que no se debe subir la carpeta `.venv`, porque contiene el entorno virtual y son muchos archivos que no forman parte del codigo fuente.
 
 ---
 
-## Privacidad y uso del micrófono
+## Problemas que se fueron corrigiendo
 
-El audio del micrófono se envía al proveedor de reconocimiento configurado (Google en el código actual) para obtener texto. No sustituye leer la documentación oficial de ese servicio sobre retención y términos de uso. En modo `ASISTENTE_TEXTO=1` no se usa el micrófono para los comandos.
+- El proyecto estaba mas orientado a Windows y yo lo cambié a Mac.
+- La voz con `pyttsx3` no funcionaba bien en macOS, por eso se cambio a `say`.
+- Hubo que seleccionar correctamente el microfono.
+- Se adapto la apertura de apps usando `open`, ya que OSX mira los programas com si fuera carpeta y no como ve windows un ".exe" .
+- Se agregaron `jarvis` y `jarviz` como palabras de activacion.
+- Se agregaron los verbos `dime`, `dame` y `donde`.
+- Se agregaron las consultas a Banxico, IP publica, ciudad y clima.
+- Se corrigio el bloque de `agente.py` para que `abre`, `dime`, `dame` y `donde` quedaran separados correctamente.
 
 ---
 
-## Resolución rápida de problemas
+## Conclusion
 
-| Síntoma | Qué revisar |
-|---------|-------------|
-| No instala PyAudio | Ruedas para tu versión de Python/Windows o `pipwin` (ver `requirements.txt`). |
-| No escucha o escucha el mic equivocado | `ASISTENTE_LISTAR_MICS=1` y ajusta índice en `config.py` o `ASISTENTE_MIC_INDEX`. |
-| Sin respuesta de voz en Windows | Instala `pywin32` o fuerza `ASISTENTE_TTS_PYTTSX3=1`. |
-| “No entendió” o timeout | Ruido de fondo, `ASISTENTE_ESCUCHA_TIMEOUT`, `ASISTENTE_FRASE_MAX_S` o umbral de energía en `config.py`. |
-| Gramática rechaza la frase | Orden de palabras, palabra de activación al inicio (tras normalización), verbo en `VERBOS` y reglas en `gramatica.py`. |
+Al inicio pense que solo era agregar tres comandos, pero realmente tuve que entender el proyecto completo: GitHub, entorno virtual, microfono, voz, gramatica, acciones y APIs.
+
+Lo que mas me quedo claro fue como se conecta todo:
+
+```text
+voz_stt.py escucha
+Google regresa texto
+gramatica.py valida
+agente.py decide
+acciones.py ejecuta
+voz_tts.py responde
+```
+
+Con eso quedo terminada mi version del asistente de voz y respaldada en GitHub.
