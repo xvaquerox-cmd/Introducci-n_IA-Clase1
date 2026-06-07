@@ -77,9 +77,7 @@ Y entonces llama la funcion que consulta Banxico.
 | `asistente_voz/acciones.py` | Aqui estan las funciones que hacen el trabajo real: abrir apps, consultar APIs, buscar en web, etc. |
 | `asistente_voz/voz_stt.py` | Es el oido del asistente. Captura audio y lo manda a Google para convertirlo a texto. |
 | `asistente_voz/voz_tts.py` | Es la boca del asistente. Convierte texto a voz para que la computadora conteste hablando. |
-| `asistente_voz/texto.py` | Normaliza el texto: minusculas, acentos, tokens y orden de palabras. |
-| `Base_Hechos.py` | Sistema experto aparte, para identificar animales por caracteristicas. |
-| `tipo-cambio/` | Mini proyecto en Node.js que use como referencia para la consulta a Banxico. |
+| `tipo-cambio/` | API se usa para la consulta a Banxico. |
 | `Notas_Cesar_Torres.txt/` | Bitacora personal del proceso. |
 
 ---
