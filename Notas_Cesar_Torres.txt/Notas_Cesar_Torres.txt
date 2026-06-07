@@ -52,8 +52,8 @@ Después de eso ya pude seguir avanzando.
 
 Entendiendo el proyecto
 
-Me tarde varios dias revisando los archivos para entender que hacia cada uno.
-Al principio se veia medio confuso porque hay varios archivos, pero ya despues
+Me tarde varios días revisando los archivos para entender que hacia cada uno.
+Al principio se via medio confuso porque hay varios archivos, pero ya después
 entendi que esta separado por responsabilidades.
 
 Los archivos principales que fui entendiendo fueron:
@@ -114,7 +114,7 @@ say "Hola, esta es una prueba"
 Y la Mac habla directamente.
 
 Por eso se modifico voz_tts.py para que si Python detecta que esta en macOS,
-use el comando nativo say. La condicion que se usa es:
+use el comando nativo say. La condición que se usa es:
 
 Este es el archivo que cambié estaba algo asi 
 
