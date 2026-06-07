@@ -78,7 +78,7 @@ else:
     MIC_DEVICE_INDEX = MIC_DEVICE_INDEX_OVERRIDE
 
 # Palabras de activación y verbos permitidos: deben coincidir con la gramática en gramatica.py (AV y V).
-WAKE_WORDS: frozenset[str] = frozenset({"alexa", "siri", "google", "cortana", "jarviz", "jarvis"})
+WAKE_WORDS: frozenset[str] = frozenset({"jarvis", "alexa", "siri", "google", "cortana", "jarviz"})
 VERBOS: frozenset[str] = frozenset(
     {
         "canta",

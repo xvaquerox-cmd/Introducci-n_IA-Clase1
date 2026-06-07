@@ -12,7 +12,7 @@ from asistente_voz.config import VERBOS, WAKE_WORDS
 
 GRAMATICA_TEXTO = r"""
 S -> AV VP
-AV -> 'alexa' | 'siri' | 'google' | 'cortana' | 'jarviz' | 'jarvis'
+AV -> 'jarviz' | 'jarvis' | 'alexa' | 'siri' | 'google' | 'cortana' |
 VP -> V | V OBJ | V DET N | V N
 DET -> 'el' | 'la' | 'los' | 'las' | 'al'
 N -> 'perro' | 'gato' | 'luis' | 'miguel' | 'mana' | 'moderato' | 'jose'

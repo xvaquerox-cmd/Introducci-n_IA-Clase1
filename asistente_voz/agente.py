@@ -55,9 +55,9 @@ def procesar_comando(comando_normalizado: str, generador_voz: GeneradorVoz) -> N
 
     if tokens[0] not in WAKE_WORDS:
         muestra = " ".join(tokens[:12]) + ("…" if len(tokens) > 12 else "")
-        print(f"(Falta Alexa/Siri/Google/Cortana/jarviz al inicio. Transcripción: {muestra})")
+        print(f"(Falta Jarvis/Alexa/Siri/Google/Cortana/jarviz al inicio. Transcripción: {muestra})")
         generador_voz.generar_voz(
-            "Inicia el comando con Alexa, Siri, Google o Cortana."
+            "Inicia el comando con Jarvis, Alexa, Siri, Google o Cortana."
         )
         return
 
