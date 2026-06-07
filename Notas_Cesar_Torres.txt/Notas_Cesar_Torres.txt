@@ -1,171 +1,401 @@
-Tuve que ver un par de videos de youtube para ver como se clonaba 
-el github 
+Notas del proyecto Asistente de Voz
+Cesar Torres
 
-para entenderlo 
-y luego para buscar el usuario 
-ya que lo encontre investigue como clonar 
-un repositorio 
+Estas son mis notas de como fui trabajando el proyecto del asistente de voz.
+La verdad al principio no tenia muy claro como usar Github, entonces lo primero
+que hice fue entender un poco la herramienta antes de meterme directo al codigo.
 
-después creamos el entorno virtual con el comando 
+El profesor compartió el proyecto desde su Github:
 
-python3 -m venv .venv
+https://github.com/Heeber24/Asistente_Voz
 
-luego lo activamos 
+Como yo no había usado mucho Github, primero busque videos en Youtube para
+entender que era clonar un repositorio, como traer un proyecto a mi maquina,
+como cambiar el remoto y como subir cambios a mi propia cuenta.
 
-source .venv/bin/activate
+Después importe o pase el proyecto a mi Github, para poder tener mi version:
 
-ya que se activo 
+https://github.com/xvaquerox-cmd/Introducci-n_IA-Clase1
 
-se intalaron los requerimientos que vienen en el archivo que nos compartio 
-el profesor 
+Y trabaje sobre una rama para no tocar directo lo que venia del profesor:
 
-una vez que intentamos de instalar los requerimientos me marco el sistema que el sistema operativo 
-para el que esta desarrollado la aplicación es para windows y que el módulo de sonido
-requeria instalarse  para lo cual consulte como instalar ese módulo para MAC y 
-se instalo completo 
+git checkout -b mi-version-asistente
 
-se volvió a ejecutar lo requerimientos y se instalaron sin problema 
-
-una vez intentando ejectar el proyecto me tope que MAC OSX ejecuta de manera diferentes las aplicaciones 
-tuve que hacer cambios en el código "config.py" en una linea cambiandola por if p.exists():
-asi como en acciones.py una linea que le agregamos open 
-"subprocess.Popen(["open",str(ruta)], shell=False)"
-
-y ademas editamos la rutas de las ubicaciones de los archivos ejecutables en la carpeta
-de aplicaciones de OSX
-
-en total se editaron 4 archivos
- 
-Archivo que cambie..
-        modified:   asistente_voz/acciones.py
-        modified:   asistente_voz/agente.py
-        modified:   asistente_voz/config.py
-        modified:   asistente_voz/gramatica.py
-        
-        
- después quise generar un esquema para no alterar el que tenia el profesor 
-y use el comando       
-        
-  git checkout -b mi-version-asistente 
-  
-  para crear una copia local para mi y no tocar el proyecto del profesor 
-  
-ya con eso trabajamos en nuestro proyecto luego entre a mi cuenta de github   
-y cambie el código a mi github con esta instrucción 
+También cambie el remoto para que apuntara a mi Github:
 
 git remote set-url origin https://github.com/xvaquerox-cmd/Introducci-n_IA-Clase1.git
 
-y despues hice un push 
+Después hice el primer push:
 
 git push -u origin mi-version-asistente
 
-y hasta ahi .. 
 
-Tarea, hay que agregar 3 comando nuevos al asistente
+Primeros pasos para correr el proyecto
 
-Comando 1
+Ya con el proyecto en mi computadora, cree el entorno virtual, que entiendo que es para no afectar toda la 
+Configuración de la computadora y es como para tener un sandbox solo del proyecto con sus parametros:
 
-Consultar el tipo de cambio de Banxico 
-Tengo un API en un ERP que estoy trabajando donde consulto 
-El tipo de cambio de Banxico el cual lo tengo en un carpeta 
-Que se llama tipo de cambio 
+python3 -m venv .venv
 
-El cual utilizo el API que tengo lo adapte al proyecto
+Luego lo active:
 
-En el config agregue el comando dime en los VERBOS
+source .venv/bin/activate
 
-En gramatica tambiénn agregue en V-> agregue "dime"
-VERBOS_CON_OBJETO_ABIERTO también agregé "dime"
+Después instale los requerimientos que venían en el proyecto del profesor.
+Aquí fue donde empece a toparme con varios errores, porque el proyecto estaba
+mas pensado para Windows y yo lo estaba corriendo en una Mac mini.
 
-En acciones.py se agrego 
+Algunos módulos de audio no estaban instalados o no funcionaban igual en Mac.
+Tuve que investigar como instalar los paquetes que hacían falta para macOS.
+Después de eso ya pude seguir avanzando.
+
+
+Entendiendo el proyecto
+
+Me tarde varios dias revisando los archivos para entender que hacia cada uno.
+Al principio se veia medio confuso porque hay varios archivos, pero ya despues
+entendi que esta separado por responsabilidades.
+
+Los archivos principales que fui entendiendo fueron:
+
+Asistente_Voz_IA.py
+Este es el archivo principal. Es el que arranca el asistente.
+
+asistente_voz/agente.py
+Este es como el cerebro del asistente. Recibe el texto que se extendió por voz,
+revisa que comando es, identifica el verbo y manda llamar la acción que toca.
+
+asistente_voz/config.py
+Aquí están las palabras de activación, los verbos permitidos, el micrófono y
+las rutas de las aplicaciones. Aquí agregue palabras como jarvis, jarviz, dime,
+dame y donde.
+
+asistente_voz/gramatica.py
+Aquí esta la gramática del asistente. Es la que valida si la frase que dije
+tiene una estructura correcta. Por ejemplo:
+
+jarvis dame el tipo de cambio
+
+El asistente primero valida que exista una palabra de activación, luego un verbo
+y después el objeto o la consulta.
+
+asistente_voz/acciones.py
+Aquí es donde están las funciones que hacen el trabajo real, por ejemplo abrir
+una aplicación, buscar en Google, reproducir en Youtube, consultar Banxico,
+consultar la IP publica o consultar el clima.
+
+asistente_voz/voz_stt.py
+Este archivo es el oido del asistente. STT significa Speech To Text, o sea voz
+a texto. Usa el micrófono, escucha lo que digo y con Google convierte mi voz a
+texto.
+
+asistente_voz/voz_tts.py
+Este archivo es la boca del asistente. TTS significa Text To Speech, o sea texto
+a voz. Recibe una frase de texto y la convierte en audio para que la computadora
+me conteste hablando.
+
+Problema con Mac y la voz
+
+Cuando intente correr el proyecto como venia del profesor, no funciono bien en
+mi Mac. Una parte importante fue que el proyecto usaba pyttsx3 para hablar.
+
+En Windows pyttsx3 funciona bien porque usa la voz de Windows, pero en Mac se
+me quedaba mudo o no terminaba de hablar bien algunas frases.
+
+Entonces revise como podia hacer hablar a la Mac desde terminal y encontre que
+macOS tiene un comando nativo que se llama:
+
+"SAY"
+
+Por ejemplo en terminal se puede ejecutar:
+
+say "Hola, esta es una prueba"
+
+Y la Mac habla directamente.
+
+Por eso se modifico voz_tts.py para que si Python detecta que esta en macOS,
+use el comando nativo say. La condicion que se usa es:
+
+Este es el archivo que cambié estaba algo asi 
+
+self._pyttsx3.say(texto)
+self._pyttsx3.runAndWait() 
+
+y se cambio por una instrucción de Mac que me pareció más fácil 
+
+subprocess.run(["say", texto], check=True)
+
+Se le agrego un IF
+Para determinar que si era una MAC en el entorno que estaba corriendo 
+
+if sys.platform == "darwin":  #aqui es donde comparo si es una MAC darwin regresa el valor si es una macOs 
+
+Claro que para llegar aquí si tuve que buscar mucho y si le pregunte a la IA como podia determinar
+Que si no era windows se fuera por aqui y a esto se llego en esta parte del archivo 
+
+
+Seleccion del microfono
+
+También tuve que revisar como seleccionar el micrófono correcto.
+En config.py esta esta variable:
+
+MIC_DEVICE_INDEX_OVERRIDE
+
+Ahi se pone el numero del micrófono que se quiere usar. En mi caso use el indice
+3 porque era el que detectaba mi micrófono USB de mi webcam.
+
+Para listar los micrófonos use un comando de Python con speech_recognition,
+que muestra todos los dispositivos de entrada disponibles.
+
+Adaptación para Mac
+
+Otra cosa que cambie fue la parte de abrir aplicaciones.
+El proyecto venia mas para Windows, por ejemplo notepad. En Mac no existe
+notepad, entonces lo adapte para abrir Notas, Chrome y Terminal.
+
+En Mac se usa el comando open para abrir aplicaciones, por eso en acciones.py
+se uso algo como:
+
+subprocess.Popen(["open", str(ruta)], shell=False)
+
+Tambien se ajustaron rutas en config.py para que apuntaran a aplicaciones de
+macOS.
+
+Entendiendo como agregar comandos
+
+Después de revisar varios días entendí que para agregar un comando nuevo casi
+siempre se tocan estos archivos:
+
+1. config.py
+Aqui se agrega el verbo a la lista VERBOS.
+
+2. gramatica.py
+Aqui se agrega el verbo a la gramatica y si es necesario se agrega a
+VERBOS_CON_OBJETO_ABIERTO para que acepte frases largas después del verbo.
+
+3. acciones.py
+Aquí se programa la función que realmente hace el trabajo.
+
+4. agente.py
+Aquí se conecta el comando de voz con la función.
+
+Por ejemplo si digo:
+
+jarvis dame el tipo de cambio
+
+El flujo mas o menos es:
+
+voz_stt.py escucha y convierte a texto
+agente.py recibe el texto
+gramatica.py valida que la frase este bien
+agente.py este es el mero mero aqui recibo la voz la separa en palabras detecta la 
+          palabra de acción "JARVIS" y el verbo y decide que función utilizar y hasta 
+          la voz aqui se manda llamar 
+
+acciones.py aqui se ejecuta el comando por ejemplo "consulta Banxico"
+voz_tts.py responde hablando
+
+
+Comando 1: Tipo de cambio de Banxico
+
+Para el primer comando nuevo recorde que en un ERP que estoy haciendo por coding
+ya habia usado una API de Banxico para consultar el tipo de cambio.
+
+Por eso se me hizo buena idea integrar ese mismo concepto al asistente.
+
+El comando quedo:
+
+jarvis dime el tipo de cambio
+jarvis dame el tipo de cambio
+
+Primero agregue los verbos dime y dame en config.py.
+Luego los agregue tambien en gramatica.py.
+
+En acciones.py agregue una funcion para consultar Banxico.
+Se agregaron los imports:
+
 import json
 import urllib.request
 
-Me encontre con un problema cuando le solicite el tipo de cambio 
-La libreria "pyttsx3" si al atacas para que diga varias cosas en Mac
-Da problemas y se queda muda y se adapto para utilizar el comando say 
-En mi terminal por ejemplo 
+La API de Banxico que se usa es:
 
-cesartorresfelix@Cesars-Mac-mini tipo-cambio % say "Hola muy buenos dias papacito"
+https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718,SF343410/datos/oportuno
 
-Y habla de una manera más natural
+Esa consulta trae el tipo de cambio FIX y el tipo de cambio de cierre.
 
-Para esto usamos dos archivos 
+En agente.py se agrego una condicion para que si la consulta contiene palabras
+como tipo de cambio, dolar o cambio, entonces mande llamar la funcion de Banxico.
 
-voz_stt.py que es el oído usa el microfono 
-voz_tts.py que es la voz ahi agregue la función "Darwin" donde phyton detecta si es una MAC y si lo es usa "say"
+Este fue el primer comando terminado:
 
-El comando estaba trabajando cone el verbo "dime" y le agregue también el comando "dame" 
-Para que también responda a "jarviz dame el tipo de cambio"
-Agregue el verbo en config y en config.py, gramatica.py, y en agente.py
-
-Doy por completado el 1er comando adicional "JARVIZ DAME/DIME TIPO DE CAMBIO"
-
-Ok ahora se me ocurrió agregar un comando nuevo "JARVIZ DAME MI IP PUBLICA"
-Investigando como puedo sacarla hay una página https://api.ipify.org/
-Que te devuelve de manera plana la IP publica de donde estas
-Y pues aproveche que es muy simple para no batallar mucho la verdad 
-Y pues directamente de la página la obtenemos la consulto y 
-Ya que la tengo reemplazo en la variable los puntos por la palabra punto 
-Para que el asistente de voz me diga en texto la palabra punto 
-Y se agrego la función en acciones.py 
-en agente.py agregamos la acción
-
-Y ya tenemos "JARVIZ DIME MI IP PUBLICA"
+JARVIS DAME/DIME EL TIPO DE CAMBIO
 
 
+Comando 2: IP publica
 
-Ok para el tercer comando se voz se me ocurrió preguntar en que ciudad estoy y que 
-Me reponda en que ciudad estoy y que clima hay como complemento para eso 
-Utilice estos servicios gratuitos los cuales agregue en el archivo acciones.py 
+Después pensé en un comando sencillo pero util, que fuera consultar mi IP
+publica.
 
-API de Localización (http://ip-api.com/json/)
-API del Clima (http://wttr.in/)
+El comando quedo:
 
-Como ya tengo la IP Pública la obtengo y con ella utilizo el API 
-De localización donde estoy y me da la ciudad y luego ese parámetro 
-lo mando para que me regrese el clima de la ciudad 
+jarvis dame mi ip publica
+jarvis dime mi ip publica
 
-Utilizando los verbos de "dame" o "dime" p¡con los que arme la oración 
-Pero resulta que me daba el clima en ingles por default 
-Pero investigando un poco hay un parámetro que manda uno en el url 
-lang=es y pues ya te lo da en español lo mismo lo grados 
-format=%C
+Para esto use una API muy sencilla:
 
-Me tope con otro problema que me daba un error usando "https" y nos e si fue suerte o que 
-Pero le quite la "s" deje solo "http" y funciono 
+https://api.ipify.org
 
-En el archivo agente.py
-Agregue la función "ejecutar_consulta_clima_local(hablar)"
+Esa pagina lo único que devuelve es la IP publica de la conexión.
 
-Ya con esto me responde 
+En acciones.py agregue una función que abre esa URL, lee el texto y guarda la IP
+en una variable.
 
-JARVIZ DAME EL CLIMA 
-JARVIZ DONDE ESTOY
+Luego para que se escuche mejor, cambie los puntos por la palabra "punto".
+Por ejemplo:
 
+189.203.44.12
 
+se convierte en:
 
+189 punto 203 punto 44 punto 12
 
+En agente.py agregue una condición para que si la consulta contiene la palabra
+"ip", entonces ejecute la función de IP publica.
 
+Con esto quedo listo:
 
-
-
+JARVIS DAME MI IP PUBLICA
 
 
+Comando 3: Ciudad y clima
+
+Para el tercer comando quise hacer algo que se viera mas completo.
+La idea fue que el asistente pudiera decirme en que ciudad estoy y tambien darme
+el clima de esa ciudad.
+
+Los comandos quedaron:
+
+jarvis donde estoy
+jarvis dime el clima
+jarvis dame el clima
+jarvis dame la temperatura
+
+Para esto se usan dos servicios públicos:
+
+1. API para detectar ciudad:
+
+http://ip-api.com/json/
+
+Esta API revisa la IP publica desde donde se hace la consulta y regresa datos
+como pais, region y ciudad.
+
+2. API para consultar el clima:
+
+http://wttr.in/
+
+El flujo fue:
+
+primero consulto ip-api.com
+guardo la ciudad en una variable
+luego uso esa ciudad para armar la URL de wttr.in
+consulto el clima
+guardo el resultado en otra variable
+armo una frase final
+el asistente la dice por voz
+
+La URL del clima queda parecida a esto:
+
+http://wttr.in/Mexicali?lang=es&format=%C+con+temperatura+de+%t
+
+lang=es es para que responda en español.
+%C es la condición del clima, por ejemplo Soleado.
+%t es la temperatura.
+
+Me paso que con https me daba un error de seguridad o certificado en mi Mac,
+entonces lo deje con http y funciono sin problema para esta consulta publica.
+
+También deje Mexicali como valor de respaldo por si algún día no detecta la
+ciudad, porque es donde estoy trabajando y así no se rompe la demostración.
+
+Para que funcionara "jarvis donde estoy" tuve que agregar el verbo donde en:
+
+config.py
+gramatica.py
+agente.py
+
+En agente.py se agrego que si el verbo es donde, ejecute directamente la función
+del clima local.
+
+Con eso el asistente responde algo como:
+
+Según tu dirección de internet, estas en la ciudad de Mexicali. El clima actual
+es Soleado con temperatura de +29°C.
 
 
+Palabras de activación
+
+También agregue jarvis y jarviz como palabras de activación.
+La razón es que a veces Google entiende diferente la pronunciación, entonces si
+digo Jarvis puede transcribir jarviz. Por eso deje las dos para que el asistente
+responda mejor.
 
 
+Problemas que fueron saliendo
+
+Hubo varios detalles que fui corrigiendo:
+
+- La voz no hablaba bien en Mac y se cambio a say.
+- No estaba claro que micrófono estaba usando y revise el indice del micrófono y seleccione el de la webcam (Mac mini).
+- Algunas aplicaciones eran de Windows y se adaptaron a Mac.
+- Para tipo de cambio primero funcionaba con dime y luego agregue dame.
+- Para donde estoy tuve que agregar donde como verbo en config y gramática.
+- En un momento rompi el bloque de abrir aplicaciones en agente.py y lo tuve que
+  acomodar de nuevo.
+- También aprendi que no se debe subir la carpeta .venv a Github porque son
+  muchos archivos del entorno virtual.
 
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+Subida final a Github
+
+Al terminar los cambios hice el respaldo en Github.
+
+El flujo que use fue:
+
+git status
+git add ...
+git commit -m "mensaje"
+git push origin mi-version-asistente
+
+También subí la carpeta tipo-cambio, que contiene el ejemplo de Node.js que había
+usado para Banxico, y subí mis notas personales para tener todo respaldado.
+
+Al final el proyecto quedo en mi rama:
+
+https://github.com/xvaquerox-cmd/Introducci-n_IA-Clase1/tree/mi-version-asistente
+
+
+Conclusion personal
+
+Al inicio pensé que solo era agregar tres comandos, pero realmente tuve que
+entender como estaba armado el asistente, como funcionaba Github, como correrlo
+en Mac, como se selecciona el micrófono, como habla la computadora, como se
+validan las frases y como se conectan las funciones.
+
+Los tres comandos nuevos que quedaron fueron:
+
+1. Consultar el tipo de cambio (lo trae de un apu de Banxico)
+2. Consultar mi IP publica.
+3. Decir en que ciudad estoy y dar el clima.
+
+Siento que lo mas importante que aprendi fue entender el camino completo:
+
+yo hablo
+el micrófono escucha
+Agente-py lo separa en palabras y las manda a
+Google, este  lo convierte en texto
+la gramatica valida la frase
+el agente decide que hacer
+acciones.py ejecuta la funcion
+voz_tts.py me responde hablando
+
+Y ya con eso pude terminar la tarea y subir mi version a Github.
